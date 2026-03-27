@@ -50,6 +50,7 @@ export class CreateWorkoutPlan {
       }
       const workoutPlan = await prisma.workoutPlan.create({
         data: {
+          id: crypto.randomUUID(),
           name: dto.name,
           userId: dto.userId,
           isActive: true,
