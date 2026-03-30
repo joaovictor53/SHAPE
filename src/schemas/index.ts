@@ -1,6 +1,10 @@
 import z from "zod";
 import { WeekDay } from "../generated/prisma/enums.js";
 
+export const StartWorkoutSessionResponseSchema = z.object({
+  userWorkoutSessionId: z.uuid(),
+});
+
 export const ErrorSchema = z.object({
   error: z.string(),
   code: z.string(),
