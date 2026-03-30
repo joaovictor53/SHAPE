@@ -9,6 +9,7 @@ interface InputDto {
     name: string;
     weekDay: WeekDay;
     isRest: boolean;
+    coverImageUrl?: string;
     estimatedDurationInSeconds: number;
     exercises: Array<{
       name: string;
@@ -19,19 +20,35 @@ interface InputDto {
     }>;
   }>;
 }
+
 interface OutputDto {
   id: string;
+  name: string;
+  workoutDays: Array<{
+    name: string;
+    weekDay: WeekDay;
+    isRest: boolean;
+    coverImageUrl?: string;
+    estimatedDurationInSeconds: number;
+    exercises: Array<{
+      order: number;
+      name: string;
+      sets: number;
+      reps: number;
+      restTimeInSeconds: number;
+    }>;
+  }>;
 }
 
 export class CreateWorkoutPlan {
-  async execute(dto: InputDto) {
+  async execute(dto: InputDto): Promise<OutputDto> {
     const existingWorkoutPlan = await prisma.workoutPlan.findFirst({
       where: {
         userId: dto.userId,
         isActive: true,
       },
     });
-    // transction - atomicidade
+
     return prisma.$transaction(async (tx) => {
       if (existingWorkoutPlan) {
         await tx.workoutPlan.update({
@@ -40,15 +57,7 @@ export class CreateWorkoutPlan {
         });
       }
 
-      if (existingWorkoutPlan) {
-        await prisma.workoutPlan.update({
-          where: { id: existingWorkoutPlan.id },
-          data: {
-            isActive: false,
-          },
-        });
-      }
-      const workoutPlan = await prisma.workoutPlan.create({
+      const workoutPlan = await tx.workoutPlan.create({
         data: {
           id: crypto.randomUUID(),
           name: dto.name,
@@ -59,6 +68,7 @@ export class CreateWorkoutPlan {
               name: workoutDay.name,
               weekDay: workoutDay.weekDay,
               isRest: workoutDay.isRest,
+              coverImageUrl: workoutDay.coverImageUrl,
               estimatedDurationInSeconds: workoutDay.estimatedDurationInSeconds,
               exercises: {
                 create: workoutDay.exercises.map((exercise) => ({
@@ -73,6 +83,7 @@ export class CreateWorkoutPlan {
           },
         },
       });
+
       const result = await tx.workoutPlan.findUnique({
         where: { id: workoutPlan.id },
         include: {
@@ -83,11 +94,31 @@ export class CreateWorkoutPlan {
           },
         },
       });
+
       if (!result) {
         throw new NotFoundError("Workout plan not found");
       }
 
-      return result;
+      return {
+        id: result.id,
+        name: result.name,
+        workoutDays: result.workoutDays.map((day) => ({
+          name: day.name,
+          weekDay: day.weekDay,
+          isRest: day.isRest,
+          coverImageUrl: day.coverImageUrl ?? undefined,
+          estimatedDurationInSeconds: day.estimatedDurationInSeconds,
+          exercises: [...day.exercises]
+            .sort((a, b) => a.order - b.order)
+            .map((exercise) => ({
+              order: exercise.order,
+              name: exercise.name,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              restTimeInSeconds: exercise.restTimeInSeconds,
+            })),
+        })),
+      };
     });
   }
 }

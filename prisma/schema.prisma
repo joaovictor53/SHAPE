@@ -58,6 +58,7 @@ model WorkoutDay {
   isRest                     Boolean           @default(true)
   weekDay                    WeekDay
   exercises                  WorkoutExercise[]
+  coverImageUrl              String?
   estimatedDurationInSeconds Int
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
