@@ -12,6 +12,7 @@ import z from "zod";
 import { auth } from "./lib/auth.js";
 import fastifyCors from "@fastify/cors";
 import fastifyApiReference from "@scalar/fastify-api-reference";
+import { homeRoutes } from "./routes/home.js";
 import { workoutPlanRoutes } from "./routes/workout-plan.js";
 
 const app = Fastify({
@@ -58,6 +59,7 @@ await app.register(fastifyApiReference, {
 });
 
 // Routes
+await app.register(homeRoutes, { prefix: "/home" });
 await app.register(workoutPlanRoutes, { prefix: "/workout-plans" });
 
 app.withTypeProvider<ZodTypeProvider>().route({
