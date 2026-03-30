@@ -5,6 +5,16 @@ export const StartWorkoutSessionResponseSchema = z.object({
   userWorkoutSessionId: z.uuid(),
 });
 
+export const UpdateWorkoutSessionBodySchema = z.object({
+  completedAt: z.iso.datetime(),
+});
+
+export const UpdateWorkoutSessionResponseSchema = z.object({
+  id: z.uuid(),
+  startedAt: z.iso.datetime(),
+  completedAt: z.iso.datetime(),
+});
+
 export const ErrorSchema = z.object({
   error: z.string(),
   code: z.string(),
