@@ -35,3 +35,4 @@ paths:
 - **SEMPRE** use Zod v4.
 - Busque sempre validar os dados com o Zod da melhor maneira possível. Exemplo: use z.url(), z.date() etc.
 - **SEMPRE** use os validadores de data ISO do Zod ao invés de regex manuais: `z.iso.date()` para datas (YYYY-MM-DD), `z.iso.datetime()` para timestamps ISO, `z.iso.time()` para horários e `z.iso.duration()` para durações.
+- **SEMPRE** use `z.enum(WeekDay)` importado de `../generated/prisma/enums.js` para tipar campos referentes aos dias da semana. **NUNCA** use `z.string()` ou `z.nativeEnum()`.
