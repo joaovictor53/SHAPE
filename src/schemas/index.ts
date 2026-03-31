@@ -128,3 +128,49 @@ export const GetStatsResponseSchema = z.object({
   conclusionRate: z.number(),
   totalTimeInSeconds: z.number(),
 });
+
+export const ListWorkoutPlansQuerySchema = z.object({
+  active: z
+    .enum(["true", "false"])
+    .transform((val) => val === "true")
+    .optional(),
+});
+
+export const ListWorkoutPlansResponseSchema = z.array(
+  z.object({
+    id: z.uuid(),
+    name: z.string(),
+    isActive: z.boolean(),
+    workoutDays: z.array(
+      z.object({
+        id: z.uuid(),
+        name: z.string(),
+        weekDay: z.enum(WeekDay),
+        isRest: z.boolean(),
+        coverImageUrl: z.url().optional(),
+        estimatedDurationInSeconds: z.number(),
+        exercises: z.array(
+          z.object({
+            id: z.uuid(),
+            name: z.string(),
+            order: z.number(),
+            sets: z.number(),
+            reps: z.number(),
+            restTimeInSeconds: z.number(),
+          }),
+        ),
+      }),
+    ),
+  }),
+);
+
+export const GetMeResponseSchema = z
+  .object({
+    userId: z.uuid(),
+    userName: z.string(),
+    weightInGrams: z.number().min(0),
+    heightInCentimeters: z.number().min(0),
+    age: z.number().min(0),
+    bodyFatPercentage: z.int().min(0).max(100),
+  })
+  .nullable();
