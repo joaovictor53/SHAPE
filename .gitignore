@@ -1,6 +1,7 @@
 node_modules
-
+.cursor
 
 .env
 ./dist
 /src/generated/prisma
+/src/tasks

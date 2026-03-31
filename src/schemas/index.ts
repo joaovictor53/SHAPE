@@ -36,7 +36,7 @@ export const HomeResponseSchema = z.object({
     .nullable(),
   workoutStreak: z.number(),
   consistencyByDay: z.record(
-    z.string(),
+    z.iso.date(),
     z.object({
       workoutDayCompleted: z.boolean(),
       workoutDayStarted: z.boolean(),
@@ -108,4 +108,23 @@ export const GetWorkoutDayResponseSchema = z.object({
       completedAt: z.iso.datetime().optional(),
     }),
   ),
+});
+
+export const GetStatsQuerySchema = z.object({
+  from: z.iso.date(),
+  to: z.iso.date(),
+});
+
+export const GetStatsResponseSchema = z.object({
+  workoutStreak: z.number(),
+  consistencyByDay: z.record(
+    z.iso.date(),
+    z.object({
+      workoutDayCompleted: z.boolean(),
+      workoutDayStarted: z.boolean(),
+    }),
+  ),
+  completedWorkoutsCount: z.number(),
+  conclusionRate: z.number(),
+  totalTimeInSeconds: z.number(),
 });
