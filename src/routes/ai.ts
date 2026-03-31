@@ -13,8 +13,9 @@ import z from "zod";
 
 import { WeekDay } from "../generated/prisma/enums.js";
 import { auth } from "../lib/auth.js";
+
 import { CreateWorkoutPlan } from "../usecases/CreateWorkoutPlan.js";
-import { GetUserTrainData } from "../usecases/GetUserTrainData.js";
+import { GetUserTrainData } from "../usecases/GetUserTrainData.js";     
 import { ListWorkoutPlans } from "../usecases/ListWorkoutPlans.js";
 import { UpsertUserTrainData } from "../usecases/UpsertUserTrainData.js";
 
@@ -98,7 +99,7 @@ export const aiRoutes = async (app: FastifyInstance) => {
         model: openai("gpt-4o-mini"),
         system: SYSTEM_PROMPT,
         messages: await convertToModelMessages(messages),
-        stopWhen: stepCountIs(10),
+        stopWhen: stepCountIs(5),
         tools: {
           getUserTrainData: tool({
             description:

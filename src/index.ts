@@ -13,6 +13,7 @@ import { auth } from "./lib/auth.js";
 import fastifyCors from "@fastify/cors";
 import fastifyApiReference from "@scalar/fastify-api-reference";
 import { homeRoutes } from "./routes/home.js";
+import { aiRoutes } from "./routes/ai.js";
 import { meRoutes } from "./routes/me.js";
 import { statsRoutes } from "./routes/stats.js";
 import { workoutPlanRoutes } from "./routes/workout-plan.js";
@@ -61,6 +62,7 @@ await app.register(fastifyApiReference, {
 });
 
 // Routes
+await app.register(aiRoutes, { prefix: "/ai" });
 await app.register(homeRoutes, { prefix: "/home" });
 await app.register(meRoutes, { prefix: "/me" });
 await app.register(statsRoutes, { prefix: "/stats" });
