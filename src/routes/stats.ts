@@ -13,8 +13,9 @@ import { GetStats } from "../usecases/GetStats.js";
 export const statsRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: "GET",
-    url: "/",
+    url: "/", 
     schema: {
+      operationId: "getStats",
       tags: ["Stats"],
       summary: "Get user workout stats for a date range",
       querystring: GetStatsQuerySchema,

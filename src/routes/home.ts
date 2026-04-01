@@ -5,7 +5,7 @@ import z from "zod";
 
 import { NotFoundError } from "../errors/index.js";
 import { auth } from "../lib/auth.js";
-import { ErrorSchema, HomeResponseSchema } from "../schemas/index.js";
+import { ErrorSchema, HomeDataSchema } from "../schemas/index.js";
 import { GetHomeData } from "../usecases/GetHomeData.js";
 
 export const homeRoutes = async (app: FastifyInstance) => {
@@ -20,7 +20,7 @@ export const homeRoutes = async (app: FastifyInstance) => {
         date: z.iso.date(),
       }),
       response: {
-        200: HomeResponseSchema,
+        200: HomeDataSchema,
         401: ErrorSchema,
         404: ErrorSchema,
         500: ErrorSchema,
@@ -44,12 +44,7 @@ export const homeRoutes = async (app: FastifyInstance) => {
           date: request.params.date,
         });
 
-        return reply.status(200).send({
-          activeWorkoutPlanId: result.activeWorkoutPlanId ?? "",
-          todayWorkoutDay: result.todayWorkoutDay ?? null,
-          workoutStreak: result.workoutStreak,
-          consistencyByDay: result.consistencyByDay,
-        });
+        return reply.status(200).send(result);
       } catch (error) {
         app.log.error(error);
 
