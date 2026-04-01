@@ -22,6 +22,14 @@ const app = Fastify({
   logger: true,
 });
 
+// Silently absorb POST /inform from UniFi network devices
+app.route({
+  method: "POST",
+  url: "/inform",
+  logLevel: "silent",
+  handler: (_req, reply) => reply.status(404).send(),
+});
+
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
@@ -97,7 +105,7 @@ app.withTypeProvider<ZodTypeProvider>().route({
 });
 
 await app.register(fastifyCors, {
-  origin: ["http://localhost:3000", "http://localhost:8080"],
+  origin: true,
 
   credentials: true,
 });
@@ -138,7 +146,7 @@ app.route({
 });
 
 try {
-  await app.listen({ port: Number(process.env.PORT ?? 8080) });
+  await app.listen({ port: Number(process.env.PORT ?? 8080), host: '::' });
 } catch (err) {
   app.log.error(err);
   process.exit(1);
