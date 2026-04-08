@@ -1,33 +1,41 @@
 import "dotenv/config";
-import Fastify from "fastify";
+
+import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
+import fastifyApiReference from "@scalar/fastify-api-reference";
+import Fastify from "fastify";
 import {
   jsonSchemaTransform,
-  jsonSchemaTransformObject,
   serializerCompiler,
   validatorCompiler,
   ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import z from "zod";
+
 import { auth } from "./lib/auth.js";
-import fastifyCors from "@fastify/cors";
-import fastifyApiReference from "@scalar/fastify-api-reference";
-import { homeRoutes } from "./routes/home.js";
+import { env } from "./lib/env.js";
 import { aiRoutes } from "./routes/ai.js";
+import { homeRoutes } from "./routes/home.js";
 import { meRoutes } from "./routes/me.js";
 import { statsRoutes } from "./routes/stats.js";
 import { workoutPlanRoutes } from "./routes/workout-plan.js";
 
-const app = Fastify({
-  logger: true,
-});
+const envToLogger = {
+  development: {
+    transport: {
+      target: "pino-pretty",
+      options: {
+        translateTime: "HH:MM:ss Z",
+        ignore: "pid,hostname",
+      },
+    },
+  },
+  production: true,
+  test: false,
+};
 
-// Silently absorb POST /inform from UniFi network devices
-app.route({
-  method: "POST",
-  url: "/inform",
-  logLevel: "silent",
-  handler: (_req, reply) => reply.status(404).send(),
+const app = Fastify({
+  logger: envToLogger[env.NODE_ENV],
 });
 
 app.setValidatorCompiler(validatorCompiler);
@@ -36,19 +44,23 @@ app.setSerializerCompiler(serializerCompiler);
 await app.register(fastifySwagger, {
   openapi: {
     info: {
-      title: "Treinos api",
-      description: "API para gerenciar treinos ",
+      title: "Bootcamp Treinos API",
+      description: "API para o bootcamp de treinos do FSC",
       version: "1.0.0",
     },
     servers: [
       {
-        url: "http://localhost:8080",
-        description: "Local server",
+        description: "API Base URL",
+        url: env.API_BASE_URL,
       },
     ],
   },
   transform: jsonSchemaTransform,
-  transformObject: jsonSchemaTransformObject,
+});
+
+await app.register(fastifyCors, {
+  origin: [env.WEB_APP_BASE_URL],
+  credentials: true,
 });
 
 await app.register(fastifyApiReference, {
@@ -56,9 +68,9 @@ await app.register(fastifyApiReference, {
   configuration: {
     sources: [
       {
-        url: "/swagger.json",
-        title: "Treinos API",
+        title: " Treinos API",
         slug: "treinos-api",
+        url: "/swagger.json",
       },
       {
         title: "Auth API",
@@ -69,12 +81,13 @@ await app.register(fastifyApiReference, {
   },
 });
 
+// RESTful
 // Routes
-await app.register(aiRoutes, { prefix: "/ai" });
 await app.register(homeRoutes, { prefix: "/home" });
 await app.register(meRoutes, { prefix: "/me" });
 await app.register(statsRoutes, { prefix: "/stats" });
 await app.register(workoutPlanRoutes, { prefix: "/workout-plans" });
+await app.register(aiRoutes, { prefix: "/ai" });
 
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
@@ -91,8 +104,8 @@ app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
   url: "/",
   schema: {
-    description: "Hello World",
-    tags: ["hello"],
+    description: "Hello world",
+    tags: ["Hello World"],
     response: {
       200: z.object({
         message: z.string(),
@@ -100,14 +113,10 @@ app.withTypeProvider<ZodTypeProvider>().route({
     },
   },
   handler: () => {
-    return { message: "Hello World" };
+    return {
+      message: "Hello World",
+    };
   },
-});
-
-await app.register(fastifyCors, {
-  origin: true,
-
-  credentials: true,
 });
 
 app.route({
@@ -149,7 +158,7 @@ app.route({
 });
 
 try {
-  await app.listen({ port: Number(process.env.PORT ?? 8080), host: '::' });
+  await app.listen({ host: "0.0.0.0", port: env.PORT });
 } catch (err) {
   app.log.error(err);
   process.exit(1);
