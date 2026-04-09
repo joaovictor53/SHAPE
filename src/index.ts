@@ -146,7 +146,13 @@ app.route({
       const response = await auth.handler(req);
       // Forward response to client
       reply.status(response.status);
-      response.headers.forEach((value, key) => reply.header(key, value));
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() === "set-cookie") {
+          reply.header("set-cookie", response.headers.getSetCookie());
+        } else {
+          reply.header(key, value);
+        }
+      });
       reply.send(response.body ? await response.text() : null);
     } catch (error) {
       app.log.error(error);
