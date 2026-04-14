@@ -6,13 +6,13 @@ interface InputDto {
   workoutPlanId: string;
   workoutDayId: string;
   sessionId: string;
-  completedAt: string;
+  completedAt: string | null;
 }
 
 interface OutputDto {
   id: string;
   startedAt: string;
-  completedAt: string;
+  completedAt: string | null;
 }
 
 export class UpdateWorkoutSession {
@@ -51,14 +51,14 @@ export class UpdateWorkoutSession {
     const updatedSession = await prisma.workoutSession.update({
       where: { id: dto.sessionId },
       data: {
-        completedAt: new Date(dto.completedAt),
+        completedAt: dto.completedAt ? new Date(dto.completedAt) : null,
       },
     });
 
     return {
       id: updatedSession.id,
       startedAt: updatedSession.startedAt.toISOString(),
-      completedAt: updatedSession.completedAt!.toISOString(),
+      completedAt: updatedSession.completedAt?.toISOString() ?? null,
     };
   }
 }

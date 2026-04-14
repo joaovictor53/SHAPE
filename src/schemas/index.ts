@@ -12,13 +12,13 @@ export const StartWorkoutSessionSchema = z.object({
 });
 
 export const UpdateWorkoutSessionBodySchema = z.object({
-  completedAt: z.iso.datetime(),
+  completedAt: z.iso.datetime().nullable(),
 });
 
 export const UpdateWorkoutSessionSchema = z.object({
   id: z.uuid(),
   startedAt: z.iso.datetime(),
-  completedAt: z.iso.datetime(),
+  completedAt: z.iso.datetime().nullable(),
 });
 
 export const StatsQuerySchema = z.object({
